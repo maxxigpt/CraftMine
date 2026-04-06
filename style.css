@@ -1,8 +1,10 @@
+@import url('https://fonts.cdnfonts.com/css/minecraft-4');
+
 body {
   margin: 0;
   overflow: hidden;
   background-color: #87CEEB; 
-  font-family: sans-serif;
+  font-family: 'Minecraft', 'Courier New', Courier, monospace;
 }
 
 #crosshair {
@@ -23,7 +25,6 @@ body {
   top: 10px;
   right: 15px;
   color: #00ff00;
-  font-family: monospace;
   font-size: 20px;
   font-weight: bold;
   background: rgba(0, 0, 0, 0.6);
@@ -36,4 +37,162 @@ body {
 #game-container {
   width: 100vw;
   height: 100vh;
+}
+
+/* --- HUD AND INVENTORY --- */
+#hud {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.hud-center {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+}
+
+#hearts-container {
+    display: flex;
+    justify-content: flex-start;
+    padding-bottom: 5px;
+    padding-left: 2px;
+}
+
+.heart {
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  background-color: transparent;
+  box-shadow: 
+    2px 0 0 0 #000, 4px 0 0 0 #000, 10px 0 0 0 #000, 12px 0 0 0 #000,
+    0 2px 0 0 #000, 2px 2px 0 0 #ff0000, 4px 2px 0 0 #ff0000, 6px 2px 0 0 #000, 8px 2px 0 0 #000, 10px 2px 0 0 #ff0000, 12px 2px 0 0 #ff0000, 14px 2px 0 0 #000,
+    0 4px 0 0 #000, 2px 4px 0 0 #ff0000, 4px 4px 0 0 #ff0000, 6px 4px 0 0 #ff0000, 8px 4px 0 0 #ff0000, 10px 4px 0 0 #ff0000, 12px 4px 0 0 #ff0000, 14px 4px 0 0 #000,
+    0 6px 0 0 #000, 2px 6px 0 0 #ff0000, 4px 6px 0 0 #ff0000, 6px 6px 0 0 #ff0000, 8px 6px 0 0 #ff0000, 10px 6px 0 0 #ff0000, 12px 6px 0 0 #ff0000, 14px 6px 0 0 #000,
+    2px 8px 0 0 #000, 4px 8px 0 0 #ff0000, 6px 8px 0 0 #ff0000, 8px 8px 0 0 #ff0000, 10px 8px 0 0 #ff0000, 12px 8px 0 0 #000,
+    4px 10px 0 0 #000, 6px 10px 0 0 #ff0000, 8px 10px 0 0 #ff0000, 10px 10px 0 0 #000,
+    6px 12px 0 0 #000, 8px 12px 0 0 #000;
+  margin-right: 18px;
+  margin-bottom: 12px;
+}
+
+.hotbar {
+    display: flex;
+    background-color: rgba(30, 30, 30, 0.7);
+    padding: 2px;
+    border: 3px solid #111;
+}
+
+.hotbar-slot {
+    width: 36px;
+    height: 36px;
+    background-color: #8b8b8b;
+    border: 3px solid;
+    border-top-color: #373737;
+    border-left-color: #373737;
+    border-bottom-color: #fff;
+    border-right-color: #fff;
+    margin: 1px;
+}
+
+.hotbar-slot.active {
+    outline: 3px solid white;
+    outline-offset: -3px;
+}
+
+/* --- PAUSE MENU --- */
+#pause-menu {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+#pause-menu.hidden {
+    display: none !important;
+}
+
+#menu-main, #menu-settings {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hidden { display: none !important; }
+
+.logo-title {
+    font-family: 'Minecraft', sans-serif;
+    font-size: 80px;
+    color: #e3e3e3;
+    text-shadow: 6px 6px 0px #000;
+    margin: 0;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.logo-subtitle {
+    font-family: 'Minecraft', sans-serif;
+    font-size: 26px;
+    color: #fff;
+    text-shadow: 4px 4px 0px #333;
+    margin-top: 5px;
+    margin-bottom: 40px;
+    letter-spacing: 5px;
+}
+
+.menu-btn {
+    width: 350px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #c6c6c6;
+    border: 3px solid;
+    border-top-color: #fff;
+    border-left-color: #fff;
+    border-bottom-color: #555;
+    border-right-color: #555;
+    color: #222;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.menu-btn:hover { background: #dfdfdf; }
+.menu-btn:active {
+    border-top-color: #555; border-left-color: #555;
+    border-bottom-color: #fff; border-right-color: #fff;
+}
+
+.setting-row {
+    width: 350px;
+    margin-bottom: 20px;
+    color: white;
+    text-shadow: 2px 2px 0 #000;
+    font-size: 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.setting-row input[type="range"] {
+    margin-top: 10px;
+    width: 100%;
+}
+
+.mc-select {
+    margin-top: 10px;
+    background: #c6c6c6;
+    border: 2px solid #000;
+    padding: 5px;
+    font-family: 'Minecraft', sans-serif;
+    font-size: 16px;
 }

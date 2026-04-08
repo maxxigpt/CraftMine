@@ -1,23 +1,26 @@
 import * as THREE from 'three';
 
 // --- AUTO-GENERATED SLOTS ---
-let invMain = '';
-for(let i=0; i<27; i++) invMain += '<div class="hotbar-slot" id="slot-" onmousedown="handleSlotClick(event, ''inv'', )" onmouseenter="handleSlotEnter(''inv'', )" oncontextmenu="return false"></div>';
-if(document.getElementById('inv-main-slots')) document.getElementById('inv-main-slots').innerHTML = invMain;
-let invHot = '';
-for(let i=0; i<9; i++) invHot += '<div class="hotbar-slot" id="slot-" onmousedown="handleSlotClick(event, ''inv'', )" onmouseenter="handleSlotEnter(''inv'', )" oncontextmenu="return false"></div>';
-if(document.getElementById('inv-hotbar-slots')) document.getElementById('inv-hotbar-slots').innerHTML = invHot;
-const hudHotbar = document.querySelector('.hud-center .hotbar');
-if(hudHotbar) {
-    let hudSlots = '';
-    for(let i=0; i<9; i++) hudSlots += '<div class="hotbar-slot'+(i===0?' active':'')+'" id="hud-slot-'+i+'" data-id="'+(i+1)+'"></div>';
-    hudHotbar.innerHTML = hudSlots;
-}
+(function() {
+    let invMain = '';
+    for(let i=0; i<27; i++) invMain += `<div class="hotbar-slot" id="slot-${i+9}" onmousedown="handleSlotClick(event, 'inv', ${i+9})" onmouseenter="handleSlotEnter('inv', ${i+9})" oncontextmenu="return false"></div>`;
+    const invMainEl = document.getElementById('inv-main-slots');
+    if(invMainEl) invMainEl.innerHTML = invMain;
 
+    let invHot = '';
+    for(let i=0; i<9; i++) invHot += `<div class="hotbar-slot" id="slot-${i}" onmousedown="handleSlotClick(event, 'inv', ${i})" onmouseenter="handleSlotEnter('inv', ${i})" oncontextmenu="return false"></div>`;
+    const invHotEl = document.getElementById('inv-hotbar-slots');
+    if(invHotEl) invHotEl.innerHTML = invHot;
 
-// ==========================================
-// CONFIGURACIÃ“N GLOBAL DEL MOTOR MUNDO
-// ==========================================
+    const hudHotbar = document.querySelector('.hud-center .hotbar');
+    if(hudHotbar) {
+        let hudSlots = '';
+        for(let i=0; i<9; i++) {
+            hudSlots += `<div class="hotbar-slot${i===0?' active':''}" id="hud-slot-${i}" data-id="${i+1}"></div>`;
+        }
+        hudHotbar.innerHTML = hudSlots;
+    }
+})();
 const CHUNK_SIZE = 16;
 const RENDER_DIST = 10;
 const SEED = Math.random() * 8888;

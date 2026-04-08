@@ -1,21 +1,19 @@
-      let invMain = '';
-      for(let i=0; i<27; i++) invMain += `<div class="hotbar-slot" id="slot-${i+9}" onmousedown="handleSlotClick(event, 'inv', ${i+9})" onmouseenter="handleSlotEnter('inv', ${i+9})" oncontextmenu="return false"></div>`;
-      if(document.getElementById('inv-main-slots')) document.getElementById('inv-main-slots').innerHTML = invMain;
-      
-      let invHot = '';
-      for(let i=0; i<9; i++) invHot += `<div class="hotbar-slot" id="slot-${i}" onmousedown="handleSlotClick(event, 'inv', ${i})" onmouseenter="handleSlotEnter('inv', ${i})" oncontextmenu="return false"></div>`;
-      if(document.getElementById('inv-hotbar-slots')) document.getElementById('inv-hotbar-slots').innerHTML = invHot;
-
-      // Also update the HUD hotbar slots to have IDs
-      const hudHotbar = document.querySelector('.hud-center .hotbar');
-      if(hudHotbar) {
-          let hudSlots = '';
-          for(let i=0; i<9; i++) {
-              hudSlots += `<div class="hotbar-slot${i===0?' active':''}" id="hud-slot-${i}" data-id="${i+1}"></div>`;
-          }
-          hudHotbar.innerHTML = hudSlots;
-      }
 import * as THREE from 'three';
+
+// --- AUTO-GENERATED SLOTS ---
+let invMain = '';
+for(let i=0; i<27; i++) invMain += '<div class="hotbar-slot" id="slot-" onmousedown="handleSlotClick(event, ''inv'', )" onmouseenter="handleSlotEnter(''inv'', )" oncontextmenu="return false"></div>';
+if(document.getElementById('inv-main-slots')) document.getElementById('inv-main-slots').innerHTML = invMain;
+let invHot = '';
+for(let i=0; i<9; i++) invHot += '<div class="hotbar-slot" id="slot-" onmousedown="handleSlotClick(event, ''inv'', )" onmouseenter="handleSlotEnter(''inv'', )" oncontextmenu="return false"></div>';
+if(document.getElementById('inv-hotbar-slots')) document.getElementById('inv-hotbar-slots').innerHTML = invHot;
+const hudHotbar = document.querySelector('.hud-center .hotbar');
+if(hudHotbar) {
+    let hudSlots = '';
+    for(let i=0; i<9; i++) hudSlots += '<div class="hotbar-slot'+(i===0?' active':'')+'" id="hud-slot-'+i+'" data-id="'+(i+1)+'"></div>';
+    hudHotbar.innerHTML = hudSlots;
+}
+
 
 // ==========================================
 // CONFIGURACIÃ“N GLOBAL DEL MOTOR MUNDO
@@ -559,8 +557,8 @@ scene.add(crackMesh);
 // --- SISTEMA DE DROPS MAGNETIZADOS ---
 const drops = [];
 function spawnDrop(x, y, z, blockType) {
-    if(!blockDefs[blockType]) blockType = 'stone';
-    const mat = new THREE.MeshLambertMaterial(blockDefs[blockType]);
+    if(!blockMaterials[blockType]) blockType = 'stone';
+    const mat = Array.isArray(blockMaterials[blockType]) ? blockMaterials[blockType][0] : blockMaterials[blockType]; 
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.25), mat);
     mesh.position.set(x, y, z);
     mesh.userData = { type: blockType, age: 0, vx: (Math.random() - 0.5) * 3, vy: 4, vz: (Math.random() - 0.5) * 3 };
@@ -1599,6 +1597,3 @@ updateInventoryUI();
 animate();
 
 </script>
-</body>
-</html>
-

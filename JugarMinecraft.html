@@ -996,8 +996,8 @@ scene.add(crackMesh);
 // --- SISTEMA DE DROPS MAGNETIZADOS ---
 const drops = [];
 function spawnDrop(x, y, z, blockType) {
-    if(!blockDefs[blockType]) blockType = 'stone';
-    const mat = new THREE.MeshLambertMaterial(blockDefs[blockType]);
+    if(!blockMaterials[blockType]) blockType = 'stone';
+    const mat = Array.isArray(blockMaterials[blockType]) ? blockMaterials[blockType][0] : blockMaterials[blockType]; 
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.25), mat);
     mesh.position.set(x, y, z);
     mesh.userData = { type: blockType, age: 0, vx: (Math.random() - 0.5) * 3, vy: 4, vz: (Math.random() - 0.5) * 3 };

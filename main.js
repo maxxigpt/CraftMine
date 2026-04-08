@@ -116,49 +116,34 @@ scene.add(sun);
 // ==========================================
 // TEXTURAS Y SHADERS (Pixel Art)
 // ==========================================
-function createTexture(type) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 16;
-    canvas.height = 16;
-    const ctx = canvas.getContext('2d');
-
+function drawPattern(ctx, type) {
     if (type === 'log_top') {
-        // Anillos concéntricos (Imagen 1)
         ctx.fillStyle = '#7d6342'; ctx.fillRect(0,0,16,16);
         ctx.fillStyle = '#a1887f'; ctx.fillRect(2,2,12,12);
         ctx.fillStyle = '#7d6342'; ctx.fillRect(4,4,8,8);
         ctx.fillStyle = '#a1887f'; ctx.fillRect(6,6,4,4);
-    } else if (type === 'log_side') {
-        // Bark vertical (Imagen 1)
+    } else if (type === 'log_side' || type === 'wood') {
         ctx.fillStyle = '#6d4c21'; ctx.fillRect(0,0,16,16);
         ctx.fillStyle = '#3e2723';
-        const barkX = [0, 2, 5, 8, 11, 14];
-        barkX.forEach(x => ctx.fillRect(x, 0, 2, 16));
-        // Detalles oscuros aleatorios
+        [0, 2, 5, 8, 11, 14].forEach(x => ctx.fillRect(x, 0, 2, 16));
         for(let i=0; i<15; i++) {
             ctx.fillStyle = '#2d1b18';
             ctx.fillRect(Math.floor(Math.random()*16), Math.floor(Math.random()*16), 1, 2);
         }
     } else if (type === 'grass_top') {
-        // Césped vibrante (Imagen 2)
         ctx.fillStyle = '#7cfc00'; ctx.fillRect(0,0,16,16);
         for(let i=0; i<40; i++) {
             ctx.fillStyle = Math.random() > 0.5 ? '#55cc00' : '#a0ff55';
             ctx.fillRect(Math.floor(Math.random()*16), Math.floor(Math.random()*16), 1, 1);
         }
-    } else if (type === 'grass_side') {
-        // Tierra con dientes de pasto (Imagen 2)
+    } else if (type === 'grass_side' || type === 'grass') {
         ctx.fillStyle = '#5d4037'; ctx.fillRect(0,0,16,16);
-        // Piedritas en la tierra
         ctx.fillStyle = '#8d6e63'; 
         for(let i=0; i<8; i++) ctx.fillRect(Math.random()*16, 5+Math.random()*11, 1, 1);
-        // Dientes de pasto
         ctx.fillStyle = '#7cfc00';
         ctx.fillRect(0,0,16,3);
         const teeth = [5,4,3,6,4,3,3,5,6,4,3,5,4,3,3,4];
-        for(let x=0; x<16; x++) {
-            ctx.fillRect(x, 0, 1, teeth[x]);
-        }
+        for(let x=0; x<16; x++) ctx.fillRect(x, 0, 1, teeth[x]);
     } else if (type === 'dirt') {
         ctx.fillStyle = '#5d4037'; ctx.fillRect(0,0,16,16);
         for(let i=0; i<15; i++) {
@@ -166,16 +151,26 @@ function createTexture(type) {
             ctx.fillRect(Math.random()*15, Math.random()*15, 2, 1);
         }
     } else if (type === 'planks') {
-        // Tablas de roble (Imagen 3)
         ctx.fillStyle = '#b08d57'; ctx.fillRect(0,0,16,16);
         ctx.fillStyle = '#7d6342';
-        for(let y=0; y<16; y+=4) ctx.fillRect(0, y, 16, 1); // Divisiones
+        for(let y=0; y<16; y+=4) ctx.fillRect(0, y, 16, 1);
         for(let i=0; i<25; i++) {
             ctx.fillStyle = 'rgba(0,0,0,0.1)';
             ctx.fillRect(Math.random()*16, Math.random()*16, 2+Math.random()*3, 1);
         }
+    } else if (type === 'skin') {
+        ctx.fillStyle = '#ffd90f'; ctx.fillRect(0,0,16,16);
+        for(let i=0; i<15; i++) {
+            ctx.fillStyle = 'rgba(0,0,0,0.05)';
+            ctx.fillRect(Math.random()*16, Math.random()*16, 1, 1);
+        }
+    } else if (type === 'sleeve') {
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,16,16);
+        for(let i=0; i<10; i++) {
+            ctx.fillStyle = 'rgba(0,0,0,0.03)';
+            ctx.fillRect(Math.random()*16, Math.random()*16, 1, 1);
+        }
     } else if (type === 'stone') {
-        // Piedra lisa mejorada
         ctx.fillStyle = '#9e9e9e'; ctx.fillRect(0,0,16,16);
         ctx.fillStyle = '#888888';
         for(let i=0; i<15; i++) ctx.fillRect(Math.random()*15, Math.random()*15, 2, 2);
@@ -204,9 +199,15 @@ function createTexture(type) {
         ctx.fillStyle = '#c19a6b';
         for(let i=0; i<3; i++) for(let j=0; j<3; j++) ctx.fillRect(4 + i*3, 4 + j*3, 2, 2);
     } else {
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,16,16);
+        ctx.fillStyle = type.startsWith('#') ? type : '#ffffff';
+        ctx.fillRect(0,0,16,16);
     }
+}
 
+function createTexture(type) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 16; canvas.height = 16;
+    drawPattern(canvas.getContext('2d'), type);
     const tex = new THREE.CanvasTexture(canvas);
     tex.magFilter = THREE.NearestFilter;
     tex.minFilter = THREE.NearestFilter;
@@ -255,13 +256,13 @@ const armGroup = new THREE.Group();
 
 // Piel del brazo (amarillo Homero, cubre la mano y antebrazo)
 const skinGeo = new THREE.BoxGeometry(0.25, 0.6, 0.45);
-const skinMat = new THREE.MeshLambertMaterial({ map: createTexture(0xffd90f, 0.1) });
+const skinMat = new THREE.MeshLambertMaterial({ map: createTexture('skin') });
 const skinMesh = new THREE.Mesh(skinGeo, skinMat);
 skinMesh.position.set(0, -0.3, 0);
 
 // Manga de la camiseta (blanca, llega un poco antes del codo)
 const sleeveGeo = new THREE.BoxGeometry(0.255, 0.4, 0.455); 
-const sleeveMat = new THREE.MeshLambertMaterial({ map: createTexture(0xffffff, 0.1) });
+const sleeveMat = new THREE.MeshLambertMaterial({ map: createTexture('sleeve') });
 const sleeveMesh = new THREE.Mesh(sleeveGeo, sleeveMat);
 sleeveMesh.position.set(0, -0.8, 0);
 
@@ -866,16 +867,9 @@ document.addEventListener('mousemove', (e) => {
 function getBlockIcon(type) {
     if (iconCache[type]) return iconCache[type];
     const canvas = document.createElement('canvas');
-    canvas.width = 32; canvas.height = 32;
+    canvas.width = 16; canvas.height = 16;
     const ctx = canvas.getContext('2d');
-    const color = blockDefs[type] ? new THREE.Color(blockDefs[type].color || 0x7f8c8d) : new THREE.Color(0x7f8c8d);
-    
-    // Simple block icon
-    ctx.fillStyle = '#' + color.getHexString();
-    ctx.fillRect(4, 4, 24, 24);
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
-    ctx.strokeRect(4, 4, 24, 24);
-    
+    drawPattern(ctx, type);
     iconCache[type] = canvas.toDataURL();
     return iconCache[type];
 }
@@ -1603,4 +1597,8 @@ window.addEventListener('keydown', (e) => {
 // Empezamos con el inventario vacío
 updateInventoryUI();
 animate();
+
+</script>
+</body>
+</html>
 

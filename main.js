@@ -1,3 +1,4 @@
+// v1.2.1 - Critical Load Fix
 import * as THREE from 'three';
 
 // --- AUTO-GENERATED SLOTS ---

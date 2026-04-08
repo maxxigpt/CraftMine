@@ -1,17 +1,34 @@
+      let invMain = '';
+      for(let i=0; i<27; i++) invMain += `<div class="hotbar-slot" id="slot-${i+9}" onmousedown="handleSlotClick(event, 'inv', ${i+9})" onmouseenter="handleSlotEnter('inv', ${i+9})" oncontextmenu="return false"></div>`;
+      if(document.getElementById('inv-main-slots')) document.getElementById('inv-main-slots').innerHTML = invMain;
+      
+      let invHot = '';
+      for(let i=0; i<9; i++) invHot += `<div class="hotbar-slot" id="slot-${i}" onmousedown="handleSlotClick(event, 'inv', ${i})" onmouseenter="handleSlotEnter('inv', ${i})" oncontextmenu="return false"></div>`;
+      if(document.getElementById('inv-hotbar-slots')) document.getElementById('inv-hotbar-slots').innerHTML = invHot;
+
+      // Also update the HUD hotbar slots to have IDs
+      const hudHotbar = document.querySelector('.hud-center .hotbar');
+      if(hudHotbar) {
+          let hudSlots = '';
+          for(let i=0; i<9; i++) {
+              hudSlots += `<div class="hotbar-slot${i===0?' active':''}" id="hud-slot-${i}" data-id="${i+1}"></div>`;
+          }
+          hudHotbar.innerHTML = hudSlots;
+      }
 import * as THREE from 'three';
 
 // ==========================================
-// CONFIGURACIÓN GLOBAL DEL MOTOR MUNDO
+// CONFIGURACIÃ“N GLOBAL DEL MOTOR MUNDO
 // ==========================================
 const CHUNK_SIZE = 16;
 const RENDER_DIST = 10;
 const SEED = Math.random() * 8888;
 const PLAYER_RADIUS = 0.3;
 const PLAYER_HEIGHT = 1.7;
-const STEP_HEIGHT = 0.6; // Medio bloque para subir escaleras automáticamente
+const STEP_HEIGHT = 0.6; // Medio bloque para subir escaleras automÃ¡ticamente
 
 // ==========================================
-// SETUP DE THREE.JS (Renderizador, Escena, Cámara)
+// SETUP DE THREE.JS (Renderizador, Escena, CÃ¡mara)
 // ==========================================
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -99,24 +116,95 @@ scene.add(sun);
 // ==========================================
 // TEXTURAS Y SHADERS (Pixel Art)
 // ==========================================
-function createTexture(baseColorHex, noiseIntensity = 0.2) {
+function createTexture(type) {
     const canvas = document.createElement('canvas');
     canvas.width = 16;
     canvas.height = 16;
     const ctx = canvas.getContext('2d');
-    const color = new THREE.Color(baseColorHex);
 
-    for (let i = 0; i < 256; i++) {
-        const x = i % 16;
-        const y = Math.floor(i / 16);
-        const noise = (Math.random() - 0.5) * noiseIntensity;
-        
-        const r = Math.floor(Math.min(255, Math.max(0, color.r * 255 * (1 + noise))));
-        const g = Math.floor(Math.min(255, Math.max(0, color.g * 255 * (1 + noise))));
-        const b = Math.floor(Math.min(255, Math.max(0, color.b * 255 * (1 + noise))));
-        
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.fillRect(x, y, 1, 1);
+    if (type === 'log_top') {
+        // Anillos concéntricos (Imagen 1)
+        ctx.fillStyle = '#7d6342'; ctx.fillRect(0,0,16,16);
+        ctx.fillStyle = '#a1887f'; ctx.fillRect(2,2,12,12);
+        ctx.fillStyle = '#7d6342'; ctx.fillRect(4,4,8,8);
+        ctx.fillStyle = '#a1887f'; ctx.fillRect(6,6,4,4);
+    } else if (type === 'log_side') {
+        // Bark vertical (Imagen 1)
+        ctx.fillStyle = '#6d4c21'; ctx.fillRect(0,0,16,16);
+        ctx.fillStyle = '#3e2723';
+        const barkX = [0, 2, 5, 8, 11, 14];
+        barkX.forEach(x => ctx.fillRect(x, 0, 2, 16));
+        // Detalles oscuros aleatorios
+        for(let i=0; i<15; i++) {
+            ctx.fillStyle = '#2d1b18';
+            ctx.fillRect(Math.floor(Math.random()*16), Math.floor(Math.random()*16), 1, 2);
+        }
+    } else if (type === 'grass_top') {
+        // Césped vibrante (Imagen 2)
+        ctx.fillStyle = '#7cfc00'; ctx.fillRect(0,0,16,16);
+        for(let i=0; i<40; i++) {
+            ctx.fillStyle = Math.random() > 0.5 ? '#55cc00' : '#a0ff55';
+            ctx.fillRect(Math.floor(Math.random()*16), Math.floor(Math.random()*16), 1, 1);
+        }
+    } else if (type === 'grass_side') {
+        // Tierra con dientes de pasto (Imagen 2)
+        ctx.fillStyle = '#5d4037'; ctx.fillRect(0,0,16,16);
+        // Piedritas en la tierra
+        ctx.fillStyle = '#8d6e63'; 
+        for(let i=0; i<8; i++) ctx.fillRect(Math.random()*16, 5+Math.random()*11, 1, 1);
+        // Dientes de pasto
+        ctx.fillStyle = '#7cfc00';
+        ctx.fillRect(0,0,16,3);
+        const teeth = [5,4,3,6,4,3,3,5,6,4,3,5,4,3,3,4];
+        for(let x=0; x<16; x++) {
+            ctx.fillRect(x, 0, 1, teeth[x]);
+        }
+    } else if (type === 'dirt') {
+        ctx.fillStyle = '#5d4037'; ctx.fillRect(0,0,16,16);
+        for(let i=0; i<15; i++) {
+            ctx.fillStyle = Math.random() > 0.5 ? '#795548' : '#4e342e';
+            ctx.fillRect(Math.random()*15, Math.random()*15, 2, 1);
+        }
+    } else if (type === 'planks') {
+        // Tablas de roble (Imagen 3)
+        ctx.fillStyle = '#b08d57'; ctx.fillRect(0,0,16,16);
+        ctx.fillStyle = '#7d6342';
+        for(let y=0; y<16; y+=4) ctx.fillRect(0, y, 16, 1); // Divisiones
+        for(let i=0; i<25; i++) {
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillRect(Math.random()*16, Math.random()*16, 2+Math.random()*3, 1);
+        }
+    } else if (type === 'stone') {
+        // Piedra lisa mejorada
+        ctx.fillStyle = '#9e9e9e'; ctx.fillRect(0,0,16,16);
+        ctx.fillStyle = '#888888';
+        for(let i=0; i<15; i++) ctx.fillRect(Math.random()*15, Math.random()*15, 2, 2);
+        ctx.strokeStyle = '#616161'; ctx.strokeRect(0,0,16,16);
+    } else if (type === 'snow') {
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,16,16);
+        ctx.fillStyle = '#f0f0f0';
+        for(let i=0; i<20; i++) ctx.fillRect(Math.random()*16, Math.random()*16, 1, 1);
+    } else if (type === 'sand') {
+        ctx.fillStyle = '#f4e1a1'; ctx.fillRect(0,0,16,16);
+        ctx.fillStyle = '#e5d190';
+        for(let i=0; i<20; i++) ctx.fillRect(Math.random()*16, Math.random()*16, 1, 1);
+    } else if (type === 'leaves') {
+        ctx.fillStyle = '#1b5e20'; ctx.fillRect(0,0,16,16);
+        for(let i=0; i<40; i++) {
+            ctx.fillStyle = Math.random() > 0.5 ? '#2e7d32' : '#0a3d0a';
+            ctx.fillRect(Math.floor(Math.random()*16), Math.floor(Math.random()*16), 1, 1);
+        }
+    } else if (type === 'crafting_table') {
+        ctx.fillStyle = '#d2b48c'; ctx.fillRect(0, 0, 16, 16);
+        ctx.fillStyle = '#5c4033';
+        ctx.fillRect(0, 0, 16, 2); ctx.fillRect(0, 14, 16, 2);
+        ctx.fillRect(0, 0, 2, 16); ctx.fillRect(14, 0, 2, 16);
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.fillRect(3, 3, 10, 10);
+        ctx.fillStyle = '#c19a6b';
+        for(let i=0; i<3; i++) for(let j=0; j<3; j++) ctx.fillRect(4 + i*3, 4 + j*3, 2, 2);
+    } else {
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,16,16);
     }
 
     const tex = new THREE.CanvasTexture(canvas);
@@ -125,19 +213,41 @@ function createTexture(baseColorHex, noiseIntensity = 0.2) {
     return tex;
 }
 
-// Catálogo de bloques instanciables
+// CatÃ¡logo de bloques instanciables con soporte multi-cara
 const blockDefs = {
-    grass: { map: createTexture(0x43a047, 0.4) },
-    stone: { map: createTexture(0x7f8c8d, 0.3) },
-    snow:  { map: createTexture(0xffffff, 0.1) },
-    wood:  { map: createTexture(0x8b5a2b, 0.3) },
-    sand:  { map: createTexture(0xebd592, 0.1) },
+    grass: [
+        { map: createTexture('grass_side') }, { map: createTexture('grass_side') },
+        { map: createTexture('grass_top') }, { map: createTexture('dirt') },
+        { map: createTexture('grass_side') }, { map: createTexture('grass_side') }
+    ],
+    stone: { map: createTexture('stone') },
+    snow:  { map: createTexture('snow') },
+    wood: [
+        { map: createTexture('log_side') }, { map: createTexture('log_side') },
+        { map: createTexture('log_top') }, { map: createTexture('log_top') },
+        { map: createTexture('log_side') }, { map: createTexture('log_side') }
+    ],
+    sand:  { map: createTexture('sand') },
+    dirt:  { map: createTexture('dirt') },
+    leaves: { map: createTexture('leaves') },
+    planks: { map: createTexture('planks') },
+    crafting_table: { map: createTexture('crafting_table') },
     water: { color: 0x2980b9, transparent: true, opacity: 0.65 }
 };
 
-// ==========================================
-// ANIMACIÓN DEL BRAZO DEL JUGADOR
-// ==========================================
+// CachÃ© de materiales y geometrÃ­as para optimizar rendimiento
+const blockMaterials = {};
+for (const k in blockDefs) {
+    if (k === 'water') {
+        blockMaterials[k] = new THREE.MeshLambertMaterial(blockDefs[k]);
+    } else if (Array.isArray(blockDefs[k])) {
+        blockMaterials[k] = blockDefs[k].map(props => new THREE.MeshLambertMaterial(props));
+    } else {
+        blockMaterials[k] = new THREE.MeshLambertMaterial(blockDefs[k]);
+    }
+}
+const boxGeom = new THREE.BoxGeometry(1, 1, 1);
+const waterGeom = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
 const armGroup = new THREE.Group();
 
 // En la vista de primera persona, la orientación del brazo hacia la cámara hace que el pivote
@@ -162,6 +272,23 @@ armGroup.position.set(0.65, -0.2, -0.7);
 armGroup.rotation.set(-Math.PI / 6, -Math.PI / 8, 0);
 
 camera.add(armGroup);
+
+// --- BLOQUE EN LA MANO ---
+const handBlockGroup = new THREE.Group();
+const handBlockMesh = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.55), new THREE.MeshLambertMaterial({color: 0xffffff}));
+handBlockMesh.material.transparent = true;
+handBlockGroup.add(handBlockMesh);
+handBlockGroup.position.set(0.9, -0.65, -0.9); // Más a la derecha
+handBlockGroup.rotation.set(0.1, Math.PI / 4, 0); 
+handBlockGroup.visible = false;
+camera.add(handBlockGroup);
+
+// --- OUTLINE DE SELECCION (Bordes del bloque) ---
+const selectionMat = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true, transparent: true, opacity: 0.4 });
+const selectionMesh = new THREE.Mesh(new THREE.BoxGeometry(1.01, 1.01, 1.01), selectionMat);
+selectionMesh.visible = false;
+scene.add(selectionMesh);
+
 scene.add(camera);
 
 let isSwinging = false;
@@ -173,13 +300,17 @@ function triggerArmSwing() {
 }
 
 // ==========================================
-// GENERACIÓN PROCEDIMENTAL Y MAPA DE ALTURAS
+// GENERACIÃ“N PROCEDIMENTAL Y MAPA DE ALTURAS
 // ==========================================
 function getH(x, z) {
-    let h = Math.sin(x * 0.035 + SEED) * Math.cos(z * 0.032 + SEED) * 11;
-    h += Math.sin(x * 0.15 + SEED) * 3;
-    if (h > 6) {
-        h += Math.pow(h - 6, 1.6) * 1.5;
+    // Más relieve y un 20% más montañas, casi nada de agua (solo en pozos profundos)
+    let h = Math.sin(x * 0.04 + SEED) * Math.cos(z * 0.04 + SEED) * 9; 
+    h += Math.sin(x * 0.12 + SEED) * 2.5;
+    h += 6; // OFFSET alto para eliminar agua en la mayoría del mapa
+    
+    // Zonas de montaña (reagregadas un 20%)
+    if (h > 10) {
+        h = 10 + (h - 10) * 1.6; 
     }
     return Math.floor(h);
 }
@@ -198,7 +329,7 @@ function getMapH(x, z) {
 }
 
 // ==========================================
-// MOTOR DE FÍSICAS Y COLISIONES AABB
+// MOTOR DE FÃSICAS Y COLISIONES AABB
 // ==========================================
 function getSolidHeight(x, z) {
     const rx1 = x + PLAYER_RADIUS;
@@ -239,7 +370,7 @@ function getFloorHeight(x, z, feetY) {
 }
 
 // ==========================================
-// GESTIÓN DE CHUNKS (Generación infinita)
+// GESTIÃ“N DE CHUNKS (GeneraciÃ³n infinita)
 // ==========================================
 const chunks = new Map();
 const dummy = new THREE.Object3D();
@@ -279,7 +410,7 @@ class Chunk {
                 if (!pools[type]) pools[type] = [];
                 pools[type].push(dummy.matrix.clone());
 
-                // Relleno hacia abajo para evitar vacíos
+                // Relleno hacia abajo para evitar vacÃ­os
                 if (h > hn + 1 && baseH === h) {
                     for (let y = h - 1; y >= hn; y--) {
                         dummy.position.set(x, y, z);
@@ -289,22 +420,30 @@ class Chunk {
                     }
                 }
 
-                // Generación de Agua
+                // GeneraciÃ³n de Agua (Solo si h es muy bajo)
                 if (h < 0) {
                     dummy.position.set(x, 0.4, z);
                     dummy.updateMatrix();
                     if (!pools['water']) pools['water'] = [];
                     pools['water'].push(dummy.matrix.clone());
                 }
+
+                // Generación de Árboles (1.5% chance)
+                if (type === 'grass' && h === baseH && h > 1) {
+                    const noise = Math.sin(wx * 123.45) * Math.cos(wz * 678.9);
+                    if (noise > 0.97) {
+                        this.spawnTree(x, h + 1, z, pools);
+                    }
+                }
             }
         }
 
         // Ensamblar las geometrías instanciadas del terreno
         for (const k in pools) {
-            const mat = new THREE.MeshLambertMaterial(blockDefs[k]);
-            const geom = (k === 'water') ? new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2) : new THREE.BoxGeometry(1, 1, 1);
+            const mat = blockMaterials[k];
+            const geom = (k === 'water') ? waterGeom : boxGeom;
             const m = new THREE.InstancedMesh(geom, mat, pools[k].length);
-            m.userData.type = k; // SET TYPE
+            m.userData.type = k;
             
             for (let i = 0; i < pools[k].length; i++) {
                 m.setMatrixAt(i, pools[k][i]);
@@ -318,6 +457,27 @@ class Chunk {
             }
         }
         scene.add(this.group);
+    }
+
+    spawnTree(tx, ty, tz, pools) {
+        const h = 3 + Math.floor(Math.random() * 2);
+        for (let y = 0; y < h; y++) {
+            dummy.position.set(tx, ty + y, tz);
+            dummy.updateMatrix();
+            if (!pools['wood']) pools['wood'] = [];
+            pools['wood'].push(dummy.matrix.clone());
+        }
+        for (let dx = -2; dx <= 2; dx++) {
+            for (let dy = 0; dy <= 2; dy++) {
+                for (let dz = -2; dz <= 2; dz++) {
+                    if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) > 4) continue;
+                    dummy.position.set(tx + dx, ty + h + dy - 1, tz + dz);
+                    dummy.updateMatrix();
+                    if (!pools['leaves']) pools['leaves'] = [];
+                    pools['leaves'].push(dummy.matrix.clone());
+                }
+            }
+        }
     }
 
     dispose() {
@@ -361,13 +521,14 @@ function updateChunks() {
 // ==========================================
 const raycaster = new THREE.Raycaster();
 const screenCenter = new THREE.Vector2(0, 0);
-let selectedType = 'stone';
+let currentSlotIdx = 0;
+let selectedType = null;
 
 // --- SISTEMA DE MINADO CONTINUO ---
 let isMining = false;
 let mineTimer = 0;
 let mineTargetPos = null;
-const miningTimes = { snow: 1.0, dirt: 2.0, grass: 2.0, sand: 2.0, wood: 4.0, leaves: 0.5, stone: 10.0, water: Infinity };
+const miningTimes = { snow: 1.0, dirt: 1.0, grass: 1.0, sand: 1.0, wood: 2.5, leaves: 0.7, stone: 8.0, water: Infinity };
 
 const crackTextures = [];
 for (let i = 0; i <= 5; i++) {
@@ -375,7 +536,7 @@ for (let i = 0; i <= 5; i++) {
     canvas.width = 16; canvas.height = 16;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, 16, 16);
-    ctx.fillStyle = 'rgba(20, 20, 20, 0.85)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
     const drawCrack = (x, y) => ctx.fillRect(x, y, 1, 1);
     if (i > 0) { drawCrack(8,8); drawCrack(7,7); drawCrack(8,7); }
     if (i > 1) { drawCrack(6,6); drawCrack(9,8); drawCrack(7,9); drawCrack(9,7); }
@@ -432,9 +593,9 @@ function getTargetBlockInfo() {
 }
 
 function breakBlockNow(info) {
-    if (info.hit.object.isInstancedMesh) {
+    if (info.hit.object.isInstancedMesh && info.hit.instanceId !== undefined) {
         const matrix = new THREE.Matrix4();
-        matrix.makeScale(0, 0, 0);
+        matrix.makeTranslation(0, -9999, 0); // Enviar al vacío para que el Raycast no lo detecte
         info.hit.object.setMatrixAt(info.hit.instanceId, matrix);
         info.hit.object.instanceMatrix.needsUpdate = true;
     } else if (info.hit.object.userData.isPlaced) {
@@ -442,11 +603,309 @@ function breakBlockNow(info) {
         const idx = interactables.indexOf(info.hit.object);
         if (idx > -1) interactables.splice(idx, 1);
     }
+    // Marcar como aire en heightEdits para no regenerarlo
     heightEdits.set(`${info.px},${info.pz}`, info.py - 1);
     spawnDrop(info.px, info.py, info.pz, info.type);
 }
 
+// --- SISTEMA DE INVENTARIO ---
+const inventory = new Array(36).fill(null).map(() => ({ type: null, count: 0 }));
+const iconCache = {};
+
+function updateInventoryUI() {
+    for (let i = 0; i < 36; i++) {
+        const slot = inventory[i];
+        const slotEl = document.getElementById(`slot-${i}`);
+        const hudSlotEl = document.getElementById(`hud-slot-${i}`);
+        
+        const updateEl = (el) => {
+            if (!el) return;
+            el.innerHTML = '';
+            if (slot.type && slot.count > 0) {
+                const img = document.createElement('img');
+                img.src = getBlockIcon(slot.type);
+                el.appendChild(img);
+                if (slot.count > 1) {
+                    const countEl = document.createElement('div');
+                    countEl.className = 'slot-count';
+                    countEl.innerText = slot.count;
+                    el.appendChild(countEl);
+                }
+            }
+        };
+        
+        updateEl(slotEl);
+        if (i < 9) updateEl(hudSlotEl);
+    }
+    // Actualizar slots de armadura
+    for (let i = 0; i < 4; i++) {
+        updateSlotEl(document.getElementById(`armor-${i}`), armorSlots[i]);
+    }
+    // Actualizar slots de crafteo
+    for (let i = 0; i < 4; i++) {
+        updateSlotEl(document.getElementById(`craft-${i}`), craftSlots[i]);
+    }
+    updateSlotEl(document.getElementById('craft-result'), craftResult);
+    
+    // Actualizar mesa de crafteo 3x3
+    for (let i = 0; i < 9; i++) {
+        updateSlotEl(document.getElementById(`table-${i}`), tableSlots[i]);
+    }
+    updateSlotEl(document.getElementById('table-result'), tableResult);
+    
+    // Mostrar item "agarrado" siguiendo al mouse
+    const pickedEl = document.getElementById('picked-item');
+    if (pickedItem && pickedItem.count > 0) {
+        pickedEl.style.display = 'block';
+        pickedEl.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = getBlockIcon(pickedItem.type);
+        pickedEl.appendChild(img);
+        if (pickedItem.count > 1) {
+            const c = document.createElement('div');
+            c.className = 'slot-count';
+            c.innerText = pickedItem.count;
+            pickedEl.appendChild(c);
+        }
+    } else {
+        pickedEl.style.display = 'none';
+    }
+}
+
+function updateSlotEl(el, slotData) {
+    if (!el) return;
+    el.innerHTML = '';
+    if (slotData && slotData.type && slotData.count > 0) {
+        const img = document.createElement('img');
+        img.src = getBlockIcon(slotData.type);
+        el.appendChild(img);
+        if (slotData.count > 1) {
+            const countEl = document.createElement('div');
+            countEl.className = 'slot-count';
+            countEl.innerText = slotData.count;
+            el.appendChild(countEl);
+        }
+    }
+}
+
+const pickedItem = { type: null, count: 0 };
+const armorSlots = new Array(4).fill(null).map(() => ({ type: null, count: 0 }));
+const craftSlots = [{type:null,count:0},{type:null,count:0},{type:null,count:0},{type:null,count:0}];
+const tableSlots = new Array(9).fill(null).map(() => ({ type: null, count: 0 }));
+let craftResult = { type: null, count: 0 };
+let tableResult = { type: null, count: 0 };
+let isCraftingTableActive = false;
+
+function toggleInventory(open, asTable = false) {
+    isUIOpen = open;
+    isCraftingTableActive = asTable;
+    overlayDOM.classList.toggle('hidden', !open);
+    
+    const standard = document.getElementById('inv-top-standard');
+    const table = document.getElementById('inv-top-crafting');
+    if (standard && table) {
+        standard.classList.toggle('hidden', asTable);
+        table.classList.toggle('hidden', !asTable);
+    }
+    
+    if (open) {
+        document.exitPointerLock();      
+        const hud = document.getElementById('hud');
+        if(hud) hud.style.display = 'none';
+        if (!asTable) uiAnimate(); 
+    } else {
+        document.body.requestPointerLock();
+        const hud = document.getElementById('hud');
+        if(hud) hud.style.display = 'block';
+    }
+    updateInventoryUI();
+}
+
+function checkCrafting() {
+    // 2x2 Crafting
+    let woodIn = 0;
+    let anyWood = false;
+    craftSlots.forEach(s => { if(s.type === 'wood' && s.count > 0) { anyWood = true; woodIn += s.count; } });
+    const isFullPlanks = craftSlots.every(s => s.type === 'planks' && s.count > 0);
+
+    if (isFullPlanks) { craftResult.type = 'crafting_table'; craftResult.count = 1; }
+    else if (anyWood) { craftResult.type = 'planks'; craftResult.count = 4; }
+    else { craftResult.type = null; craftResult.count = 0; }
+
+    // 3x3 Table Crafting (Plank square -> Table)
+    let planksCount = 0;
+    tableSlots.forEach(s => { if(s.type === 'planks' && s.count > 0) planksCount++; });
+    if (planksCount === 4 && tableSlots[0].type === 'planks' && tableSlots[1].type === 'planks' && tableSlots[3].type === 'planks' && tableSlots[4].type === 'planks') {
+        tableResult.type = 'crafting_table'; tableResult.count = 1;
+    } else if (tableSlots.some(s => s.type === 'wood' && s.count > 0)) {
+        // En la mesa también se puede procesar madera
+        tableResult.type = 'planks'; tableResult.count = 4;
+    } else {
+        tableResult.type = null; tableResult.count = 0;
+    }
+}
+
+let isRightDown = false;
+document.addEventListener('mousedown', (e) => { if(e.button === 2) isRightDown = true; });
+document.addEventListener('mouseup', (e) => { if(e.button === 2) isRightDown = false; });
+
+function handleSlotEnter(type, index) {
+    if (isUIOpen && isRightDown && pickedItem.type) {
+        let target = null;
+        if (type === 'inv') target = inventory[index];
+        else if (type === 'craft') target = craftSlots[index];
+        else if (type === 'armor') target = armorSlots[index];
+        else if (type === 'table') target = tableSlots[index];
+        
+        if (target && (!target.type || target.type === pickedItem.type) && target.count < 64) {
+            target.type = pickedItem.type;
+            target.count++;
+            pickedItem.count--;
+            if (pickedItem.count <= 0) pickedItem.type = null;
+            checkCrafting();
+            updateInventoryUI();
+        }
+    }
+}
+
+function handleSlotClick(e, type, index) {
+    if (e) e.preventDefault();
+    const isRightClick = e && e.button === 2;
+    
+    let target = null;
+    let resultRef = null;
+    let gridRef = null;
+
+    if (type === 'inv') target = inventory[index];
+    else if (type === 'craft') target = craftSlots[index];
+    else if (type === 'table') target = tableSlots[index];
+    else if (type === 'armor') target = armorSlots[index];
+    else if (type === 'result') { target = { type: null, count: 0 }; resultRef = craftResult; gridRef = craftSlots; }
+    else if (type === 'table-result') { target = { type: null, count: 0 }; resultRef = tableResult; gridRef = tableSlots; }
+
+    if (resultRef) {
+        if (resultRef.type && (!pickedItem.type || pickedItem.type === resultRef.type)) {
+            if (!pickedItem.type) pickedItem.type = resultRef.type;
+            if (pickedItem.count + resultRef.count <= 64) {
+                pickedItem.count += resultRef.count;
+                gridRef.forEach(s => { if (s.count > 0) { s.count--; if (s.count === 0) s.type = null; } });
+                checkCrafting();
+                updateInventoryUI();
+            }
+        }
+        return;
+    }
+
+    if (!pickedItem.type && target.type) {
+        if (isRightClick && target.count > 1) {
+            // Recoger MITAD (Click derecho)
+            const half = Math.ceil(target.count / 2);
+            pickedItem.type = target.type;
+            pickedItem.count = half;
+            target.count -= half;
+        } else {
+            // Recoger TODO (Click izquierdo o solo 1 item)
+            pickedItem.type = target.type;
+            pickedItem.count = target.count;
+            target.type = null; target.count = 0;
+        }
+    } else if (pickedItem.type && !target.type) {
+        if (isRightClick) {
+            // Soltar UNO (Click derecho)
+            target.type = pickedItem.type;
+            target.count = 1;
+            pickedItem.count--;
+            if (pickedItem.count === 0) pickedItem.type = null;
+        } else {
+            // Soltar TODO (Click izquierdo)
+            target.type = pickedItem.type;
+            target.count = pickedItem.count;
+            pickedItem.type = null; pickedItem.count = 0;
+        }
+    } else if (pickedItem.type === target.type) {
+        if (isRightClick) {
+            // Soltar UNO en stack (Click derecho)
+            if (target.count < 64) {
+                target.count++;
+                pickedItem.count--;
+                if (pickedItem.count === 0) pickedItem.type = null;
+            }
+        } else {
+            // Mezclar TODO (Click izquierdo)
+            const space = 64 - target.count;
+            const toAdd = Math.min(space, pickedItem.count);
+            target.count += toAdd;
+            pickedItem.count -= toAdd;
+            if (pickedItem.count === 0) pickedItem.type = null;
+        }
+    } else if (pickedItem.type && target.type && !isRightClick) {
+        // Intercambiar TODO (Click izquierdo)
+        let tmpT = target.type; let tmpC = target.count;
+        target.type = pickedItem.type; target.count = pickedItem.count;
+        pickedItem.type = tmpT; pickedItem.count = tmpC;
+    }
+    
+    if (type === 'craft') checkCrafting();
+    updateInventoryUI();
+}
+window.handleSlotClick = handleSlotClick;
+
+document.addEventListener('mousemove', (e) => {
+    if (isUIOpen) {
+        mouseXUI = (e.clientX / window.innerWidth) * 2 - 1;
+        mouseYUI = -(e.clientY / window.innerHeight) * 2 + 1;
+        
+        const pEl = document.getElementById('picked-item');
+        if (pEl) {
+            pEl.style.left = (e.clientX - 33) + 'px';
+            pEl.style.top = (e.clientY - 33) + 'px';
+        }
+    }
+});
+
+function getBlockIcon(type) {
+    if (iconCache[type]) return iconCache[type];
+    const canvas = document.createElement('canvas');
+    canvas.width = 32; canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    const color = blockDefs[type] ? new THREE.Color(blockDefs[type].color || 0x7f8c8d) : new THREE.Color(0x7f8c8d);
+    
+    // Simple block icon
+    ctx.fillStyle = '#' + color.getHexString();
+    ctx.fillRect(4, 4, 24, 24);
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+    ctx.strokeRect(4, 4, 24, 24);
+    
+    iconCache[type] = canvas.toDataURL();
+    return iconCache[type];
+}
+
+function addToInventory(type, shouldUpdateUI = true) {
+    if (gameMode === 'creative') return true;
+    
+    // 1. Buscar si ya existe el tipo (stacking)
+    for (let i = 0; i < 36; i++) {
+        if (inventory[i].type === type && inventory[i].count < 64) {
+            inventory[i].count++;
+            if (shouldUpdateUI) updateInventoryUI();
+            return true;
+        }
+    }
+    
+    // 2. Buscar primer slot libre
+    for (let i = 0; i < 36; i++) {
+        if (!inventory[i].type || inventory[i].count === 0) {
+            inventory[i].type = type;
+            inventory[i].count = 1;
+            if (shouldUpdateUI) updateInventoryUI();
+            return true;
+        }
+    }
+    return false;
+}
+
 function updateDrops(dt) {
+    let changed = false;
     for (let i = drops.length - 1; i >= 0; i--) {
         const drop = drops[i];
         const ud = drop.userData;
@@ -454,12 +913,16 @@ function updateDrops(dt) {
         drop.rotation.y += 2 * dt;
         
         const dist = drop.position.distanceTo(camera.position); 
-        if (dist < 3.0 && ud.age > 0.5) { // Attraction delay
+        if (dist < 3.0 && ud.age > 0.5) { 
             const dir = camera.position.clone().sub(drop.position).normalize();
-            drop.position.addScaledVector(dir, 12.0 * dt);
-            if (dist < 0.8) {
-                scene.remove(drop);
-                drops.splice(i, 1);
+            drop.position.addScaledVector(dir, 14.0 * dt);
+            if (dist < 0.85) {
+                // Agregar sin actualizar UI todavía (para optimizar)
+                if (addToInventory(ud.type, false)) {
+                    scene.remove(drop);
+                    drops.splice(i, 1);
+                    changed = true;
+                }
                 continue;
             }
         } else {
@@ -476,6 +939,8 @@ function updateDrops(dt) {
             }
         }
     }
+    // Actualizar UI solo una vez si algo cambió
+    if (changed) updateInventoryUI();
 }
 
 function updateMining(dt) {
@@ -498,10 +963,10 @@ function updateMining(dt) {
         mineTimer = 0;
     }
 
-    const reqTime = miningTimes[info.type] || 3.0;
+    const reqTime = miningTimes[info.type] || 3.0; // Tierra por defecto
     mineTimer += dt;
     
-    if (!isSwinging || swingTime > 1.5) triggerArmSwing(); 
+    if (!isSwinging || swingTime > 2.8) triggerArmSwing(); 
 
     crackMesh.visible = true;
     crackMesh.position.set(info.px, info.py, info.pz);
@@ -523,30 +988,54 @@ function updateMining(dt) {
 
 document.addEventListener('mousedown', (e) => {
     if (!isLocked) return;
+    const info = getTargetBlockInfo();
+
     if (e.button === 0) {
         isMining = true;
         mineTimer = 0;
     } else if (e.button === 2) {
-        const info = getTargetBlockInfo();
-        if(!info) return;
+        if (info && info.type === 'crafting_table') {
+            // INTERACCIÓN MESA: Abrir UI
+            toggleInventory(true, true);
+            return;
+        }
+        
+        const slot = inventory[currentSlotIdx];
+        if (!slot || !slot.type || slot.count <= 0) return;
+
+        if (!info) return;
         const hit = info.hit;
         const hitNorm = hit.face ? hit.face.normal.clone() : new THREE.Vector3(0, 1, 0);
         const normMatrix = new THREE.Matrix3().getNormalMatrix(hit.object.matrixWorld);
         hitNorm.applyMatrix3(normMatrix).normalize();
+        
         const p = hit.point.clone().add(hitNorm.clone().multiplyScalar(0.1));
         const px = Math.round(p.x), py = Math.round(p.y), pz = Math.round(p.z);
         const pCamX = Math.round(camera.position.x), pCamZ = Math.round(camera.position.z);
-        if (Math.abs(px - pCamX) < 1 && Math.abs(pz - pCamZ) < 1 && py > camera.position.y - 2 && py < camera.position.y + 1) return;
         
-        const mat = new THREE.MeshLambertMaterial(blockDefs[selectedType]);
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat);
+        // No poner bloque en la posicion del jugador
+        if (Math.abs(px - pCamX) < 1 && Math.abs(pz - pCamZ) < 1 && py > camera.position.y - 1.8 && py < camera.position.y + 0.5) return;
+        
+        const bType = slot.type;
+        const mat = blockMaterials[bType];
+        const mesh = new THREE.Mesh(boxGeom, mat);
         mesh.position.set(px, py, pz);
         mesh.userData.isPlaced = true;
-        mesh.userData.type = selectedType;
+        mesh.userData.type = bType;
         
         scene.add(mesh);
         interactables.push(mesh);
         if (py > getMapH(px, pz)) heightEdits.set(`${px},${pz}`, py);
+        
+        // Consumir item (solo en supervivencia)
+        if (gameMode !== 'creative') {
+            slot.count--;
+            if (slot.count <= 0) {
+                slot.type = null;
+                slot.count = 0;
+            }
+        }
+        updateInventoryUI();
         triggerArmSwing();
     }
 });
@@ -559,9 +1048,7 @@ document.addEventListener('mouseup', (e) => {
     }
 });
 
-// ==========================================
-// CONTROLES DE CÁMARA (PointerLock Editado)
-// ==========================================
+// =============================================================================
 let isLocked = false;
 let sensX = 1.0;
 let sensY = 1.0;
@@ -572,11 +1059,29 @@ const PI_2 = Math.PI / 2;
 document.addEventListener('pointerlockchange', () => {
     isLocked = (document.pointerLockElement === document.body);
     const pm = document.getElementById('pause-menu');
+    const overlay = document.getElementById('inventory-overlay');
+    const hud = document.getElementById('hud');
     
     if (isLocked) {
-        pm.classList.add('hidden');
+        if(pm) pm.classList.add('hidden');
+        // REANUDAR BUCLE SI ESTABA PAUSADO
+        if (typeof gameLoopId === 'undefined' || gameLoopId === null) {
+            if(typeof pTime !== 'undefined') pTime = performance.now();
+            gameLoopId = requestAnimationFrame(animate);
+        }
+        // Cerrar inventario al reanudar desde el menú
+        if (typeof isUIOpen !== 'undefined' && isUIOpen) {
+            isUIOpen = false;
+            if (overlay) overlay.classList.add('hidden');
+            if(hud) hud.style.display = 'block';
+        }
     } else {
-        pm.classList.remove('hidden');
+        if(pm) pm.classList.remove('hidden');
+        // PAUSAR BUCLE
+        if (typeof gameLoopId !== 'undefined' && gameLoopId !== null) {
+            cancelAnimationFrame(gameLoopId);
+        }
+        gameLoopId = null;
     }
 });
 
@@ -592,7 +1097,7 @@ document.body.addEventListener('mousemove', (e) => {
 });
 
 // ==========================================
-// UI INTERFAZ, MENÚS & EVENTOS GLOBALES
+// UI INTERFAZ, MENÃšS & EVENTOS GLOBALES
 // ==========================================
 let gameMode = 'survival';
 
@@ -611,7 +1116,7 @@ document.getElementById('btn-back').addEventListener('click', () => {
 });
 
 document.getElementById('btn-quit').addEventListener('click', () => {
-    alert("Juego guardado (Demo). ¡Hasta luego!");
+    alert("Juego guardado (Demo). Â¡Hasta luego!");
     window.location.reload();
 });
 
@@ -631,17 +1136,24 @@ document.getElementById('game-mode').addEventListener('change', (e) => {
     document.getElementById('hearts-container').style.display = (gameMode === 'creative') ? 'none' : 'flex';
 });
 
-const slotTypes = ['stone', 'grass', 'snow', 'wood', 'sand', 'stone', 'grass', 'wood', 'sand'];
 document.addEventListener('keydown', (e) => {
     if (e.key >= '1' && e.key <= '9') {
+        currentSlotIdx = parseInt(e.key) - 1;
         document.querySelectorAll('.hotbar-slot').forEach(s => s.classList.remove('active'));
-        document.querySelector(`.hotbar-slot[data-id="${e.key}"]`).classList.add('active');
-        selectedType = slotTypes[parseInt(e.key) - 1];
+        
+        // Mark both HUD and Inv slots as active
+        const hudSlot = document.getElementById(`hud-slot-${slotIdx}`);
+        const invSlot = document.getElementById(`slot-${slotIdx}`);
+        if(hudSlot) hudSlot.classList.add('active');
+        if(invSlot) invSlot.classList.add('active');
+        
+        const slot = inventory[currentSlotIdx];
+        selectedType = (slot && slot.type && slot.count > 0) ? slot.type : null;
     }
 });
 
 // ==========================================
-// REGISTRO DE INPUTS FÍSICOS (Teclado)
+// REGISTRO DE INPUTS FÃSICOS (Teclado)
 // ==========================================
 let mF = 0, mB = 0, mL = 0, mR = 0, mU = 0, mD = 0;
 let spr = 0, lW = 0;
@@ -685,9 +1197,9 @@ document.addEventListener('keyup', (e) => {
 });
 
 // ==========================================
-// BUCLE PRINCIPAL DE ANIMACIÓN Y RENDER
+// BUCLE PRINCIPAL DE ANIMACIÃ“N Y RENDER
 // ==========================================
-camera.position.set(0, 30, 0);
+camera.position.set(0, getMapH(0,0) + PLAYER_HEIGHT + 2, 0);
 
 let pTime = performance.now();
 let fC = 0;
@@ -730,7 +1242,7 @@ function animate() {
             scene.fog.far = 250;
         }
 
-        // Efecto de Campo Visual Dinámico para Sprint
+        // Efecto de Campo Visual DinÃ¡mico para Sprint
         camera.fov += (((spr && mF) ? 88 : 75) - camera.fov) * 0.15;
         camera.updateProjectionMatrix();
 
@@ -744,7 +1256,7 @@ function animate() {
             vel.y -= (inW ? 10 : 35) * d;
         }
 
-        // Traducir Control de Cámara a Vector Físico
+        // Traducir Control de CÃ¡mara a Vector FÃ­sico
         const dir = new THREE.Vector3(Number(mR) - Number(mL), 0, Number(mF) - Number(mB));
         
         if (dir.lengthSq() > 0) {
@@ -766,26 +1278,58 @@ function animate() {
 
         const onGround = (feetY - curSolidY) <= 0.1;
 
-        // Visual Inmersivo del Brazo (Swing por Click o Balanceo de caminata)
+        // Visual Inmersivo del Brazo / Bloque
+        const slot = inventory[currentSlotIdx];
+        const activeType = (slot && slot.type && slot.count > 0) ? slot.type : null;
+        selectedType = activeType;
+
+        // --- ACTUALIZAR OUTLINE DE SELECCION ---
+        const selInfo = getTargetBlockInfo();
+        if (selInfo && cameraMode === 0) {
+            selectionMesh.visible = true;
+            selectionMesh.position.set(selInfo.px, selInfo.py, selInfo.pz);
+        } else {
+            selectionMesh.visible = false;
+        }
+
+        if (activeType) {
+            armGroup.visible = false;
+            handBlockGroup.visible = (cameraMode === 0);
+            if (blockDefs[activeType] && blockDefs[activeType].map) {
+                handBlockMesh.material.map = blockDefs[activeType].map;
+                handBlockMesh.material.color.set(0xffffff);
+            } else {
+                handBlockMesh.material.map = null;
+                handBlockMesh.material.color.set(blockDefs[activeType]?.color || 0x7f8c8d);
+            }
+            handBlockMesh.material.needsUpdate = true;
+        } else {
+            armGroup.visible = (cameraMode === 0);
+            handBlockGroup.visible = false;
+        }
+
         if (isSwinging) {
-            swingTime += d * 15;
-            armGroup.rotation.x = -Math.PI / 6 - Math.sin(swingTime) * 1.0;
+            swingTime += d * 9; // Velocidad aumentada a 9
+            const swingTarget = activeType ? handBlockGroup : armGroup;
+            swingTarget.rotation.x = -Math.PI / 6 - Math.sin(swingTime) * 1.0;
             
             if (swingTime > Math.PI) {
                 isSwinging = false;
-                armGroup.rotation.x = -Math.PI / 6;
+                swingTarget.rotation.x = -Math.PI / 6;
             }
         } else if (onGround && (vel.x !== 0 || vel.z !== 0) && !isFlying) {
-            armGroup.rotation.x = -Math.PI / 6 + Math.sin(t * 0.012) * 0.08;
-            armGroup.rotation.z = Math.cos(t * 0.006) * 0.04;
+            const swingTarget = activeType ? handBlockGroup : armGroup;
+            swingTarget.rotation.x = -Math.PI / 6 + Math.sin(t * 0.012) * 0.08;
+            if(!activeType) armGroup.rotation.z = Math.cos(t * 0.006) * 0.04;
         } else {
-            armGroup.rotation.x = THREE.MathUtils.lerp(armGroup.rotation.x, -Math.PI / 6, 10 * d);
-            armGroup.rotation.z = THREE.MathUtils.lerp(armGroup.rotation.z, 0, 10 * d);
+            const swingTarget = activeType ? handBlockGroup : armGroup;
+            swingTarget.rotation.x = THREE.MathUtils.lerp(swingTarget.rotation.x, -Math.PI / 6, 10 * d);
+            if(!activeType) armGroup.rotation.z = THREE.MathUtils.lerp(armGroup.rotation.z, 0, 10 * d);
         }
 
-        // Modos de Elevación
+        // Modos de ElevaciÃ³n
         if (!isFlying) {
-            if (inW) { // Natación
+            if (inW) { // NataciÃ³n
                 if (mU) { vel.y += 24 * d; if (feetY > -0.3) vel.y = 6; }
                 if (mD) vel.y -= 25 * d;
                 vel.y = Math.max(Math.min(vel.y, 6), -4);
@@ -795,10 +1339,10 @@ function animate() {
         } else { 
             if (mU) vel.y = 10;
             else if (mD) vel.y = -10;
-            else vel.y *= 0.8; // Fricción al detener impulso de vuelo
+            else vel.y *= 0.8; // FricciÃ³n al detener impulso de vuelo
         }
 
-        // Resolución de Colisiones X / Z (Revisión de paredes)
+        // ResoluciÃ³n de Colisiones X / Z (RevisiÃ³n de paredes)
         camera.position.y += vel.y * d;
         let newFeetY = camera.position.y - PLAYER_HEIGHT;
 
@@ -822,7 +1366,7 @@ function animate() {
             }
         }
 
-        // Cierre y adaptación sobre terreno
+        // Cierre y adaptaciÃ³n sobre terreno
         const finalFloorY = getFloorHeight(camera.position.x, camera.position.z, camera.position.y - PLAYER_HEIGHT);
         
         if (camera.position.y - PLAYER_HEIGHT < finalFloorY) {
@@ -836,8 +1380,8 @@ function animate() {
     pTime = t;
     
     if (cameraMode === 0) {
-        armGroup.visible = true;
         tpsPlayer.visible = false;
+        // armGroup.visible ya se controla arriba segun activeType
         renderer.render(scene, camera);
     } else {
         armGroup.visible = false;
@@ -891,7 +1435,7 @@ function animate() {
 
         tpsCamera.position.copy(camera.position).addScaledVector(dir, dist);
         
-        // Mover el punto al que mira la cámara ligeramente abajo en modo frontal para centrar o evitar que tape cuerpo
+        // Mover el punto al que mira la cámara ligeramente abajo en modo frontal para ver la cara bien
         const target = camera.position.clone();
         if (cameraMode === 2) target.y -= 0.5;
 
@@ -900,17 +1444,24 @@ function animate() {
     }
 }
 
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+window.addEventListener('resize', onResize);
+function onResize() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    tpsCamera.aspect = window.innerWidth / window.innerHeight;
+    tpsCamera.aspect = w / h;
     tpsCamera.updateProjectionMatrix();
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(w, h);
+}
+
+// Corregir zoom al entrar en modo pantalla completa
+document.addEventListener('fullscreenchange', () => {
+    setTimeout(onResize, 100);
 });
 
-// Despertar Bucle Gráfico Central
-animate();
+// El bucle se inicia al final del script
 
 /* =========================================================
    SISTEMA DE INVENTARIO UI: DATOS -> EVENTOS -> DOM
@@ -931,7 +1482,7 @@ light2.position.set(2, 5, 3);
 scene2.add(light2);
 scene2.add(new THREE.AmbientLight(0xffffff, 0.8));
 
-// Creación del personaje (Homer con proporciones de Steve)
+// CreaciÃ³n del personaje (Homer con proporciones de Steve)
 const uiPlayer = new THREE.Group();
 
 const matYellow = new THREE.MeshLambertMaterial({color: 0xffd90f});
@@ -1033,7 +1584,7 @@ function uiAnimate() {
         requestAnimationFrame(uiAnimate);
         if (renderer2) {
             uiPlayer.rotation.y = -Math.PI / 8 + mouseXUI * 0.8;
-            uiPlayer.rotation.x = mouseYUI * 0.3;
+            uiPlayer.rotation.x = -mouseYUI * 0.3; // Invertido para que siga al mouse
             renderer2.render(scene2, camera2);
         }
     }
@@ -1041,29 +1592,15 @@ function uiAnimate() {
 
 window.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() === 'e') {
-        isUIOpen = !isUIOpen;
-        overlayDOM.classList.toggle('hidden', !isUIOpen);
-        
-        if (isUIOpen) {
-            document.exitPointerLock();      
-            togglePause(true);               
-            const hud = document.getElementById('hud');
-            if(hud) hud.style.display = 'none';
-        } else {
-            document.body.requestPointerLock();
-            togglePause(false);              
-            const hud = document.getElementById('hud');
-            if(hud) hud.style.display = 'block';
-        }
+        if (!isLocked && !isUIOpen) return;
+        toggleInventory(!isUIOpen, false);
     }
 });
 
-function togglePause(shouldPause) {
-    if (shouldPause) {
-        cancelAnimationFrame(gameLoopId); 
-        requestAnimationFrame(uiAnimate);
-    } else {
-        if(typeof pTime !== 'undefined') pTime = performance.now(); 
-        gameLoopId = requestAnimationFrame(animate); 
-    }
-}
+// ==========================================
+// INICIALIZACIÓN FINAL
+// ==========================================
+// Empezamos con el inventario vacío
+updateInventoryUI();
+animate();
+

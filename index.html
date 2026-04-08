@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minecraft Clone Optimizado</title>
+  <title>CraftMine - Minecraft Web Optimizado</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body oncontextmenu="return false;">
   <div id="fps">FPS: 0</div>
   <div id="crosshair">+</div>
   
+  <div id="picked-item"></div>
   <div id="hud">
     <div class="hud-center">
         <div id="hearts-container">
@@ -17,15 +18,7 @@
             <div class="heart"></div><div class="heart"></div><div class="heart"></div><div class="heart"></div><div class="heart"></div>
         </div>
         <div class="hotbar">
-            <div class="hotbar-slot active" data-id="1"></div>
-            <div class="hotbar-slot" data-id="2"></div>
-            <div class="hotbar-slot" data-id="3"></div>
-            <div class="hotbar-slot" data-id="4"></div>
-            <div class="hotbar-slot" data-id="5"></div>
-            <div class="hotbar-slot" data-id="6"></div>
-            <div class="hotbar-slot" data-id="7"></div>
-            <div class="hotbar-slot" data-id="8"></div>
-            <div class="hotbar-slot" data-id="9"></div>
+            <!-- Slots generados por el motor -->
         </div>
     </div>
   </div>
@@ -66,18 +59,19 @@
 
   <div id="inventory-overlay" class="hidden">
       <div class="inv-window">
-          <div class="inv-top">
+          <!-- Standard Inventory Top (2x2) -->
+          <div class="inv-top" id="inv-top-standard">
               <div class="inv-equipment">
-                  <div class="hotbar-slot">
+                  <div class="hotbar-slot" id="armor-0" onmousedown="handleSlotClick(event, 'armor', 0)" onmouseenter="handleSlotEnter('armor', 0)" oncontextmenu="return false">
                     <svg class="armor-icon" viewBox="0 0 16 16"><path fill="#333" d="M5,2 h6 v2 h2 v4 h-2 v-3 h-6 v3 h-2 v-4 h2 z"/></svg>
                   </div>
-                  <div class="hotbar-slot">
+                  <div class="hotbar-slot" id="armor-1" onmousedown="handleSlotClick(event, 'armor', 1)" onmouseenter="handleSlotEnter('armor', 1)" oncontextmenu="return false">
                     <svg class="armor-icon" viewBox="0 0 16 16"><path fill="#333" d="M5,2 h6 v2 h2 v2 h2 v6 h-3 v-2 h-8 v2 h-3 v-6 h2 v-2 h2 z"/></svg>
                   </div>
-                  <div class="hotbar-slot">
+                  <div class="hotbar-slot" id="armor-2" onmousedown="handleSlotClick(event, 'armor', 2)" onmouseenter="handleSlotEnter('armor', 2)" oncontextmenu="return false">
                     <svg class="armor-icon" viewBox="0 0 16 16"><path fill="#333" d="M4,2 h8 v2 h2 v5 h-3 v-4 h-6 v4 h-3 v-5 h2 z"/></svg>
                   </div>
-                  <div class="hotbar-slot">
+                  <div class="hotbar-slot" id="armor-3" onmousedown="handleSlotClick(event, 'armor', 3)" onmouseenter="handleSlotEnter('armor', 3)" oncontextmenu="return false">
                     <svg class="armor-icon" viewBox="0 0 16 16"><path fill="#333" d="M3,6 h4 v6 h-5 v-3 h1 z M9,6 h4 v6 h5 v-3 h-1 z"/></svg>
                   </div>
               </div>
@@ -85,13 +79,40 @@
               <div class="inv-crafting">
                   <span style="color:#333; position:absolute; top:-20px;">Crafting</span>
                   <div class="craft-grid">
-                      <div class="hotbar-slot"></div><div class="hotbar-slot"></div>
-                      <div class="hotbar-slot"></div><div class="hotbar-slot"></div>
+                      <div class="hotbar-slot" id="craft-0" onmousedown="handleSlotClick(event, 'craft', 0)" onmouseenter="handleSlotEnter('craft', 0)" oncontextmenu="return false"></div>
+                      <div class="hotbar-slot" id="craft-1" onmousedown="handleSlotClick(event, 'craft', 1)" onmouseenter="handleSlotEnter('craft', 1)" oncontextmenu="return false"></div>
+                      <div class="hotbar-slot" id="craft-2" onmousedown="handleSlotClick(event, 'craft', 2)" onmouseenter="handleSlotEnter('craft', 2)" oncontextmenu="return false"></div>
+                      <div class="hotbar-slot" id="craft-3" onmousedown="handleSlotClick(event, 'craft', 3)" onmouseenter="handleSlotEnter('craft', 3)" oncontextmenu="return false"></div>
                   </div>
               </div>
-              <div class="craft-arrow">➡</div>
-              <div class="craft-result"><div class="hotbar-slot" style="width: 48px; height: 48px;"></div></div>
+              <div class="craft-arrow">&#8594;</div>
+              <div class="craft-result"><div class="hotbar-slot" id="craft-result" onmousedown="handleSlotClick(event, 'result', 0)" onmouseenter="handleSlotEnter('result', 0)" oncontextmenu="return false"></div></div>
           </div>
+          
+          <!-- Special Crafting Table Top (3x3) -->
+          <div class="inv-top hidden" id="inv-top-crafting" style="padding-top: 20px;">
+              <div style="flex: 1; display:flex; justify-content:center; align-items:center; gap:30px;">
+                  <div style="text-align:center;">
+                    <div style="color:#333; margin-bottom:5px; font-weight:bold;">Mesa de Crafteo</div>
+                    <div class="craft-grid" style="grid-template-columns: repeat(3, 1fr); width:192px; height:192px;">
+                        <div class="hotbar-slot" id="table-0" onmousedown="handleSlotClick(event, 'table', 0)" onmouseenter="handleSlotEnter('table', 0)" oncontextmenu="return false"></div>
+                        <div class="hotbar-slot" id="table-1" onmousedown="handleSlotClick(event, 'table', 1)" onmouseenter="handleSlotEnter('table', 1)" oncontextmenu="return false"></div>
+                        <div class="hotbar-slot" id="table-2" onmousedown="handleSlotClick(event, 'table', 2)" onmouseenter="handleSlotEnter('table', 2)" oncontextmenu="return false"></div>
+                        <div class="hotbar-slot" id="table-3" onmousedown="handleSlotClick(event, 'table', 3)" onmouseenter="handleSlotEnter('table', 3)" oncontextmenu="return false"></div>
+                        <div class="hotbar-slot" id="table-4" onmousedown="handleSlotClick(event, 'table', 4)" onmouseenter="handleSlotEnter('table', 4)" oncontextmenu="return false"></div>
+                        <div class="hotbar-slot" id="table-5" onmousedown="handleSlotClick(event, 'table', 5)" onmouseenter="handleSlotEnter('table', 5)" oncontextmenu="return false"></div>
+                        <div class="hotbar-slot" id="table-6" onmousedown="handleSlotClick(event, 'table', 6)" onmouseenter="handleSlotEnter('table', 6)" oncontextmenu="return false"></div>
+                        <div class="hotbar-slot" id="table-7" onmousedown="handleSlotClick(event, 'table', 7)" onmouseenter="handleSlotEnter('table', 7)" oncontextmenu="return false"></div>
+                        <div class="hotbar-slot" id="table-8" onmousedown="handleSlotClick(event, 'table', 8)" onmouseenter="handleSlotEnter('table', 8)" oncontextmenu="return false"></div>
+                    </div>
+                  </div>
+                  <div class="craft-arrow" style="margin-top:20px;">&#8594;</div>
+                  <div style="margin-top:20px;">
+                    <div class="hotbar-slot" id="table-result" onmousedown="handleSlotClick(event, 'table-result', 0)" onmouseenter="handleSlotEnter('table-result', 0)" oncontextmenu="return false"></div>
+                  </div>
+              </div>
+          </div>
+          
           <div class="inv-main" id="inv-main-slots"></div>
           <div class="inv-hotbar" id="inv-hotbar-slots"></div>
       </div>
@@ -99,15 +120,6 @@
 
   <div id="game-container"></div>
   
-  <script>
-      let invMain = '';
-      for(let i=0; i<27; i++) invMain += '<div class="hotbar-slot"></div>';
-      if(document.getElementById('inv-main-slots')) document.getElementById('inv-main-slots').innerHTML = invMain;
-      
-      let invHot = '';
-      for(let i=0; i<9; i++) invHot += '<div class="hotbar-slot"></div>';
-      if(document.getElementById('inv-hotbar-slots')) document.getElementById('inv-hotbar-slots').innerHTML = invHot;
-  </script>
   <script type="importmap">
     {
       "imports": {

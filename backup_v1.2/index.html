@@ -64,50 +64,8 @@
       </div>
   </div>
 
-  <div id="inventory-overlay" class="hidden">
-      <div class="inv-window">
-          <div class="inv-top">
-              <div class="inv-equipment">
-                  <div class="hotbar-slot">
-                    <svg class="armor-icon" viewBox="0 0 16 16"><path fill="#333" d="M5,2 h6 v2 h2 v4 h-2 v-3 h-6 v3 h-2 v-4 h2 z"/></svg>
-                  </div>
-                  <div class="hotbar-slot">
-                    <svg class="armor-icon" viewBox="0 0 16 16"><path fill="#333" d="M5,2 h6 v2 h2 v2 h2 v6 h-3 v-2 h-8 v2 h-3 v-6 h2 v-2 h2 z"/></svg>
-                  </div>
-                  <div class="hotbar-slot">
-                    <svg class="armor-icon" viewBox="0 0 16 16"><path fill="#333" d="M4,2 h8 v2 h2 v5 h-3 v-4 h-6 v4 h-3 v-5 h2 z"/></svg>
-                  </div>
-                  <div class="hotbar-slot">
-                    <svg class="armor-icon" viewBox="0 0 16 16"><path fill="#333" d="M3,6 h4 v6 h-5 v-3 h1 z M9,6 h4 v6 h5 v-3 h-1 z"/></svg>
-                  </div>
-              </div>
-              <div class="inv-player-preview" id="inv-3d-preview"></div>
-              <div class="inv-crafting">
-                  <span style="color:#333; position:absolute; top:-20px;">Crafting</span>
-                  <div class="craft-grid">
-                      <div class="hotbar-slot"></div><div class="hotbar-slot"></div>
-                      <div class="hotbar-slot"></div><div class="hotbar-slot"></div>
-                  </div>
-              </div>
-              <div class="craft-arrow">➡</div>
-              <div class="craft-result"><div class="hotbar-slot" style="width: 48px; height: 48px;"></div></div>
-          </div>
-          <div class="inv-main" id="inv-main-slots"></div>
-          <div class="inv-hotbar" id="inv-hotbar-slots"></div>
-      </div>
-  </div>
-
   <div id="game-container"></div>
-  
-  <script>
-      let invMain = '';
-      for(let i=0; i<27; i++) invMain += '<div class="hotbar-slot"></div>';
-      if(document.getElementById('inv-main-slots')) document.getElementById('inv-main-slots').innerHTML = invMain;
-      
-      let invHot = '';
-      for(let i=0; i<9; i++) invHot += '<div class="hotbar-slot"></div>';
-      if(document.getElementById('inv-hotbar-slots')) document.getElementById('inv-hotbar-slots').innerHTML = invHot;
-  </script>
+
   <script type="importmap">
     {
       "imports": {

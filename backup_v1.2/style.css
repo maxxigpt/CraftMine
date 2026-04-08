@@ -91,16 +91,15 @@ body {
 }
 
 .hotbar-slot {
-    width: 60px;
-    height: 60px;
+    width: 36px;
+    height: 36px;
     background-color: #8b8b8b;
     border: 3px solid;
     border-top-color: #373737;
     border-left-color: #373737;
     border-bottom-color: #fff;
     border-right-color: #fff;
-    margin: 0;
-    box-sizing: content-box;
+    margin: 1px;
 }
 
 .hotbar-slot.active {
@@ -196,66 +195,4 @@ body {
     padding: 5px;
     font-family: 'Minecraft', sans-serif;
     font-size: 16px;
-}
-
-/* --- INVENTORY UI --- */
-#inventory-overlay {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center; justify-content: center;
-    z-index: 2000;
-}
-.inv-window {
-    background: #c6c6c6;
-    border: 4px solid;
-    border-top-color: #fff; border-left-color: #fff;
-    border-bottom-color: #555; border-right-color: #555;
-    width: max-content;
-    padding: 20px;
-    font-family: 'Minecraft', sans-serif;
-    box-shadow: inset 2px 2px 0px #fff, inset -2px -2px 0px #555;
-}
-.inv-top {
-    display: flex;
-    margin-bottom: 20px;
-    position: relative;
-    padding-top: 20px;
-}
-.inv-player-preview {
-    width: 198px; height: 264px;
-    background: #000;
-    position: relative;
-    border: 4px solid;
-    border-top-color: #555; border-left-color: #555;
-    border-bottom-color: #fff; border-right-color: #fff;
-    margin-left: 10px;
-    overflow: hidden;
-}
-.inv-equipment { display: flex; flex-direction: column; gap: 0; }
-.craft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-.inv-crafting { position: relative; margin-left: 60px;}
-.craft-arrow { position: absolute; left: 470px; top: 50px; font-size: 50px; color: #555; font-weight: bold;}
-.craft-result { position: absolute; left: 512px; top: 25px; }
-.inv-main, .inv-hotbar {
-    display: flex; flex-wrap: wrap;
-    width: 594px; /* 9 * 66 */
-    margin: 0 auto;
-}
-.inv-main { margin-bottom: 15px; }
-
-/* Slot Override for UI */
-.inv-window .craft-result .hotbar-slot { width: 80px; height: 80px; }
-
-.armor-icon { width: 80%; height: 80%; margin: 10%; opacity: 0.5; }
-
-#inv-3d-preview {
-    display: flex;
-    align-items: center; justify-content: center;
-}
-#inv-3d-preview canvas {
-    width: 100% !important;
-    height: 100% !important;
-    outline: none;
 }

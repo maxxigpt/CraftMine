@@ -1599,4 +1599,3 @@ window.addEventListener('keydown', (e) => {
 updateInventoryUI();
 animate();
 
-</script>
